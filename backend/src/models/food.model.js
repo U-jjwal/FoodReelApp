@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { FoodPartner } from "./foodpartner.model";
+import { FoodPartner } from "./foodpartner.model.js";
 
 const foodSchema =  new mongoose.Schema({
     name: {
@@ -13,10 +13,10 @@ const foodSchema =  new mongoose.Schema({
     description: {
         type: String,
     },
-    FoodPartner: {
+    foodPartner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "FoodPartner"
     }
 }) 
 
-export const Food = mongoose.model('Food', foodSchema);
+export const Food = mongoose.model('Food', foodSchema); 
