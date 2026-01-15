@@ -96,10 +96,10 @@ export const registerFoodPartner = async (req, res) => {
         if (!req.body) {
         return res.status(400).json({ message: "Request body missing" });
         }
-        
-        const { name, email, password } = req.body;
 
-        if(!name || !email || !password) return res.status(400).json({ message: "All fields are required" });
+        const { name, email, password, contactName, phone, address } = req.body;
+
+        if(!name || !email || !password || !contactName || !phone || !address) return res.status(400).json({ message: "All fields are required" });
 
         const partnerAlreadyExists = await FoodPartner.findOne({ email });
 
@@ -109,7 +109,7 @@ export const registerFoodPartner = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         //create new food partner
-        const newFoodPartner = await FoodPartner.create({ name, email, password: hashedPassword });
+        const newFoodPartner = await FoodPartner.create({ name, email, password: hashedPassword, contactName, phone, address });
 
         const token = jwt.sign({
             FoodPartnerId: newFoodPartner._id
@@ -121,7 +121,10 @@ export const registerFoodPartner = async (req, res) => {
             message: "Food Partner registered Successfully",
             _id: newFoodPartner._id,
             name: newFoodPartner.name,
-            email: newFoodPartner.email
+            email: newFoodPartner.email,
+            phone: newFoodPartner.phone,
+            contactName: newFoodPartner.contactName,
+            address: newFoodPartner.address
         })
         
     } catch (error) {
