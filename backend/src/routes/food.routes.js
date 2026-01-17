@@ -20,4 +20,6 @@ router.route('/').post(authenticateFoodPartner, upload.single("video"), createFo
 
 router.route('/').get(authenticateUser, getFoodItems);
 
+
+
 export default router; 
