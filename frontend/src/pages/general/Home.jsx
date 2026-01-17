@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Store, ChevronDown } from "lucide-react";
+import { Store, ChevronDown, Heart, Bookmark, MessageCircle, Home as HomeIcon } from "lucide-react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Home() {
   const [videos, setVideos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
 
   const containerRef = useRef(null);
   const reelRefs = useRef([]);
@@ -22,6 +23,8 @@ export default function Home() {
         console.error("Error fetching videos:", err);
       });
   }, []);
+// router.route('/like').post(authenticateUser,likeFood)
+
 
   /* ================= PLAY ONLY ONE VIDEO ================= */
   const playOnly = (index) => {
@@ -86,7 +89,8 @@ export default function Home() {
           key={video._id}
           data-index={idx}
           ref={(el) => (reelRefs.current[idx] = el)}
-          className="h-screen w-full snap-start relative"
+          className="w-full snap-start relative"
+          style={{ height: 'calc(100vh - 64px)' }}
         >
           {/* VIDEO */}
           <video
@@ -100,19 +104,47 @@ export default function Home() {
           />
 
           {/* GRADIENT OVERLAY */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
 
-          {/* BOTTOM INFO */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+          {/* BOTTOM INFO - moved up slightly so it doesn't clash with bottom nav */}
+          <div className="absolute bottom-24 left-0 right-0 px-6 pb-2 z-10">
             <p className="text-white text-sm mb-4">{video.description}</p>
 
             <Link
               to={`/food-partner/${video.foodPartner}`}
-              className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold"
+              className="mx-auto w-44 bg-linear-to-r from-orange-500 to-pink-500 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold"
             >
               <Store className="w-5 h-5" />
               Visit Store
             </Link>
+          </div>
+
+          {/* RIGHT SIDE ACTIONS (likes, save, comments) */}
+          <div className="absolute right-4 bottom-28 z-20 flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center text-white">
+              <button onClick={ async ()=> {
+                 await axios.post("http://localhost:5000/api/v1/food/like",{
+                    
+                 } ,{ withCredentials: true })
+              }} className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-2">
+                <Heart className="w-6 h-6 text-white" />
+              </button>
+              <span className="text-xs font-semibold">{video.likes || 0}</span>
+            </div>
+
+            <div className="flex flex-col items-center text-white">
+              <button className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-2">
+                <Bookmark className="w-6 h-6 text-white" />
+              </button>
+              <span className="text-xs font-semibold">{video.saved || 0}</span>
+            </div>
+
+            <div className="flex flex-col items-center text-white">
+              <button className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-2">
+                <MessageCircle className="w-6 h-6 text-white" />
+              </button>
+              <span className="text-xs font-semibold">{(video.comments && video.comments.length) || 0}</span>
+            </div>
           </div>
 
           {/* SCROLL HINT */}
@@ -124,6 +156,29 @@ export default function Home() {
           )}
         </section>
       ))}
+
+      {/* BOTTOM NAVIGATION */}
+  <nav className="fixed left-0 right-0 bottom-0 z-50 bg-black border-t border-white/6">
+        <div className="max-w-3xl mx-auto flex justify-around items-center h-16">
+          <button
+            onClick={() => navigate('/')}
+            className="flex flex-col items-center text-white/90"
+            aria-label="Home"
+          >
+            <HomeIcon className="w-6 h-6" />
+            <span className="text-xs mt-1">home</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/saved')}
+            className="flex flex-col items-center text-white/90"
+            aria-label="Saved"
+          >
+            <Bookmark className="w-6 h-6" />
+            <span className="text-xs mt-1">saved</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }

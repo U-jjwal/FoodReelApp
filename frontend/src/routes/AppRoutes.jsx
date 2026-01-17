@@ -5,6 +5,7 @@ import  UserLogin  from '../pages/auth/UserLogin'
 import  FoodPartnerRegister from '../pages/auth/FoodPartnerRegister'
 import  FoodPartnerLogin from '../pages/auth/FoodPartnerLogin'
 import Home from '../pages/general/Home'
+import Saved from '../pages/general/Saved'
 import { CreateFood } from '../pages/foodpartner/CreateFood'
 import Profile from '../pages/foodpartner/Profile'
 
@@ -20,6 +21,7 @@ import Profile from '../pages/foodpartner/Profile'
          <Route path="/food-partner/register" element={<FoodPartnerRegister />} />
          <Route path="/food-partner/login" element={<FoodPartnerLogin />} /> 
         <Route path='/' element={<Home />} />
+  <Route path='/saved' element={<Saved />} />
         <Route path='/create-food' element={<CreateFood />} />
         <Route path='/food-partner/:id' element={<Profile />} />
        </Routes>

@@ -1,7 +1,7 @@
 import express from "express";
 import { Router } from "express";
 import { authenticateFoodPartner, authenticateUser } from "../middlewares/auth.middleware.js";
-import {createFood, getFoodItems } from "../controllers/food.controller.js";
+import {createFood, getFoodItems, likeFood, saveFood } from "../controllers/food.controller.js";
 import multer from "multer";
 import { get } from "mongoose";
 const router = Router();
@@ -20,6 +20,8 @@ router.route('/').post(authenticateFoodPartner, upload.single("video"), createFo
 
 router.route('/').get(authenticateUser, getFoodItems);
 
+router.route('/like').post(authenticateUser,likeFood)
 
+router.route('/save').post(authenticateUser,saveFood)
 
 export default router; 
