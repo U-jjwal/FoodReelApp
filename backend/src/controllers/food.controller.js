@@ -41,7 +41,9 @@ export const getFoodItems = async (req, res) => {
 export const likeFood = async (req, res) => {
 
     const { foodId } = req.body
-    const isAlreadyLiked = await likeModel.findOne({
+    const user = req.user;
+
+    const isAlreadyLiked = await Like.findOne({
         user: user._id,
         food: foodId
     })
@@ -60,7 +62,7 @@ export const likeFood = async (req, res) => {
         $inc: { likeCount: -1 }
     })
 
-    const like = await likeModel.create({
+    const like = await Like.create({
         user: user._id,
         food: foodId
     })

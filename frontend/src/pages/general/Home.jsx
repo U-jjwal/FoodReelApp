@@ -17,6 +17,7 @@ export default function Home() {
     axios
       .get("http://localhost:5000/api/v1/food/", { withCredentials: true })
       .then((res) => {
+        console.log(res.data)
         setVideos(res.data.foodItems);
       })
       .catch((err) => {
@@ -123,13 +124,21 @@ export default function Home() {
           <div className="absolute right-4 bottom-28 z-20 flex flex-col items-center gap-6">
             <div className="flex flex-col items-center text-white">
               <button onClick={ async ()=> {
-                 await axios.post("http://localhost:5000/api/v1/food/like",{
-                    
+                 const response = await axios.post("http://localhost:5000/api/v1/food/like",{
+                    foodId: video._id
                  } ,{ withCredentials: true })
+
+                 if(response.data.like){
+                    console.log("Video liked");
+                    setVideos((prev) => prev.map((v) => v._id === video._id ? { ...v, likeCount: v.likeCount + 1 } : v))
+                 } else {
+                     console.log("Video liked");
+                    setVideos((prev) => prev.map((v) => v._id === video._id ? { ...v, likeCount: v.likeCount - 1 } : v))
+                 }
               }} className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-2">
                 <Heart className="w-6 h-6 text-white" />
               </button>
-              <span className="text-xs font-semibold">{video.likes || 0}</span>
+              <span className="text-xs font-semibold">{video.likeCount || 0}</span>
             </div>
 
             <div className="flex flex-col items-center text-white">
