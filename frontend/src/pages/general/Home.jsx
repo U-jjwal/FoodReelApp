@@ -1,5 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Store, ChevronDown, Heart, Bookmark, MessageCircle, Home as HomeIcon } from "lucide-react";
+import {
+  Store,
+  ChevronDown,
+  Heart,
+  Bookmark,
+  MessageCircle,
+  Home as HomeIcon,
+} from "lucide-react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -17,14 +24,59 @@ export default function Home() {
     axios
       .get("http://localhost:5000/api/v1/food/", { withCredentials: true })
       .then((res) => {
-        console.log(res.data)
         setVideos(res.data.foodItems);
       })
       .catch((err) => {
         console.error("Error fetching videos:", err);
       });
   }, []);
-// router.route('/like').post(authenticateUser,likeFood)
+
+  const likehandle = async (videoId) => {
+    const response = await axios.post(
+      "http://localhost:5000/api/v1/food/like",
+      {
+        foodId: videoId,
+      },
+      { withCredentials: true }
+    );
+
+    if (response.data.like) {
+    //   console.log("Video liked");
+      setVideos((prev) =>
+        prev.map((v) =>
+          v._id === videoId ? { ...v, likeCount: v.likeCount + 1 } : v
+        )
+      );
+    } else {
+    //   console.log("Video unliked");
+      setVideos((prev) =>
+        prev.map((v) =>
+          v._id === videoId ? { ...v, likeCount: v.likeCount - 1 } : v
+        )
+      );
+    }
+  };
+   
+ const saveVideo = async (videoId) => {
+  const response = await axios.post(
+    "http://localhost:5000/api/v1/food/save",
+    { foodId: videoId },
+    { withCredentials: true }
+  );
+
+  setVideos((prev) =>
+    prev.map((v) =>
+      v._id === videoId
+        ? {
+            ...v,
+            isSaved: response.data.isSaved,
+            saveCount: response.data.saveCount
+          }
+        : v
+    )
+  );
+};
+
 
 
   /* ================= PLAY ONLY ONE VIDEO ================= */
@@ -45,7 +97,7 @@ export default function Home() {
   /* ================= AUTO PLAY FIRST VIDEO ================= */
   useEffect(() => {
     if (videos.length > 0 && videoRefs.current[0]) {
-      playOnly(0);
+      playOnly(currentIndex);
     }
   }, [videos]);
 
@@ -91,7 +143,7 @@ export default function Home() {
           data-index={idx}
           ref={(el) => (reelRefs.current[idx] = el)}
           className="w-full snap-start relative"
-          style={{ height: 'calc(100vh - 64px)' }}
+          style={{ height: "calc(100vh - 64px)" }}
         >
           {/* VIDEO */}
           <video
@@ -123,36 +175,29 @@ export default function Home() {
           {/* RIGHT SIDE ACTIONS (likes, save, comments) */}
           <div className="absolute right-4 bottom-28 z-20 flex flex-col items-center gap-6">
             <div className="flex flex-col items-center text-white">
-              <button onClick={ async ()=> {
-                 const response = await axios.post("http://localhost:5000/api/v1/food/like",{
-                    foodId: video._id
-                 } ,{ withCredentials: true })
-
-                 if(response.data.like){
-                    console.log("Video liked");
-                    setVideos((prev) => prev.map((v) => v._id === video._id ? { ...v, likeCount: v.likeCount + 1 } : v))
-                 } else {
-                     console.log("Video liked");
-                    setVideos((prev) => prev.map((v) => v._id === video._id ? { ...v, likeCount: v.likeCount - 1 } : v))
-                 }
-              }} className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-2">
+              <button
+                onClick={() => likehandle(video._id)}
+                className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-2"
+              >
                 <Heart className="w-6 h-6 text-white" />
               </button>
-              <span className="text-xs font-semibold">{video.likeCount || 0}</span>
+              <span className="text-xs font-semibold">{video.likeCount}</span>
             </div>
 
             <div className="flex flex-col items-center text-white">
-              <button className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-2">
+              <button onClick={() => saveVideo(video._id)} className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-2">
                 <Bookmark className="w-6 h-6 text-white" />
               </button>
-              <span className="text-xs font-semibold">{video.saved || 0}</span>
+              <span className="text-xs font-semibold">{video.saveCount}</span>
             </div>
 
             <div className="flex flex-col items-center text-white">
               <button className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-2">
                 <MessageCircle className="w-6 h-6 text-white" />
               </button>
-              <span className="text-xs font-semibold">{(video.comments && video.comments.length) || 0}</span>
+              <span className="text-xs font-semibold">
+                {(video.comments && video.comments.length) || 0}
+              </span>
             </div>
           </div>
 
@@ -167,10 +212,10 @@ export default function Home() {
       ))}
 
       {/* BOTTOM NAVIGATION */}
-  <nav className="fixed left-0 right-0 bottom-0 z-50 bg-black border-t border-white/6">
+      <nav className="fixed left-0 right-0 bottom-0 z-50 bg-black border-t border-white/6">
         <div className="max-w-3xl mx-auto flex justify-around items-center h-16">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="flex flex-col items-center text-white/90"
             aria-label="Home"
           >
@@ -179,7 +224,7 @@ export default function Home() {
           </button>
 
           <button
-            onClick={() => navigate('/saved')}
+            onClick={() => navigate("/saved")}
             className="flex flex-col items-center text-white/90"
             aria-label="Saved"
           >

@@ -1,9 +1,9 @@
 import express from "express";
 import { Router } from "express";
 import { authenticateFoodPartner, authenticateUser } from "../middlewares/auth.middleware.js";
-import {createFood, getFoodItems, likeFood, saveFood } from "../controllers/food.controller.js";
+import {clearAllSavedFoods, createFood, fixLikeCounts, getFoodItems, getSaveFood, likeFood, saveFood } from "../controllers/food.controller.js";
 import multer from "multer";
-import { get } from "mongoose";
+
 const router = Router();
 
 const upload = multer({
@@ -23,5 +23,16 @@ router.route('/').get(authenticateUser, getFoodItems);
 router.route('/like').post(authenticateUser,likeFood)
 
 router.route('/save').post(authenticateUser,saveFood)
+
+router.get('/fix-data', fixLikeCounts);
+
+router.route('/save').get(authenticateUser,getSaveFood)
+
+router.delete(
+  "/save/clear",
+  authenticateUser,
+  clearAllSavedFoods
+);
+
 
 export default router; 
