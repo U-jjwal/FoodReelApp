@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { 
   ArrowLeft, 
@@ -7,16 +7,19 @@ import {
   Heart, 
   Bookmark, 
   MessageCircle, 
-  ChevronDown 
+  MapPin, 
+  Play,
+  Grid3X3,
+  UtensilsCrossed
 } from "lucide-react";
 
 export default function FoodPartnerProfile() {
   const { id } = useParams();
-  const navigate = useNavigate(); // Initialize navigation
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [videos, setVideos] = useState([]);
   
-  // State to track view mode: null = Grid, number = Player
+  // View Mode: null = Grid, number = Player
   const [activeVideoIndex, setActiveVideoIndex] = useState(null);
 
   const containerRef = useRef(null);
@@ -27,7 +30,7 @@ export default function FoodPartnerProfile() {
   // --- FETCH DATA ---
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/v1/food-partner/${id}`, { withCredentials: true })
+      .get(`/api/v1/food-partner/${id}`, { withCredentials: true })
       .then((response) => {
         setProfile(response.data.foodPartner);
         setVideos(response.data.foodPartner.foodItems);
@@ -86,138 +89,213 @@ export default function FoodPartnerProfile() {
   }, [activeVideoIndex]);
 
 
-  if (!profile) return <div className="text-white p-4">Loading...</div>;
+  if (!profile) return (
+    <div className="min-h-screen bg-[#121212] flex items-center justify-center text-white/50">
+      <div className="animate-pulse">Loading...</div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-black relative">
+    // OUTER RESPONSIVE WRAPPER
+    <div className="min-h-screen bg-[#121212] flex justify-center items-center font-sans">
       
-      {/* ---------------- VIEW 1: PROFILE GRID ---------------- */}
-      {activeVideoIndex === null && (
-        <div className="flex justify-center py-6">
-          
-          {/* NEW: Back Button to Home (Top Left) */}
-          <button 
-            onClick={() => navigate('/')} 
-            className="absolute top-4 left-4 z-10 text-white bg-black/40 p-2 rounded-full backdrop-blur-md"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
+      {/* MOBILE APP CONTAINER */}
+      <div className="w-full md:w-[460px] h-[100dvh] bg-black relative shadow-2xl md:rounded-xl overflow-hidden flex flex-col">
 
-          <div className="w-full max-w-sm text-white mt-8">
-            {/* Profile Card */}
-            <div className="bg-[#6b1f2a] rounded-2xl p-4 mb-4 mx-2">
-              <div className="flex gap-4 items-center">
-                <div className="w-20 h-20 rounded-full bg-green-800 border-2 border-green-400" />
-                <div className="flex-1 space-y-2">
-                  <div className="bg-green-800 text-center py-1 rounded-lg text-sm font-semibold">
-                    {profile.name}
-                  </div>
-                  <div className="bg-green-800 text-center py-1 rounded-lg text-sm">
-                    {profile.address}
-                  </div>
+        {/* ==================== VIEW 1: PROFILE GRID ==================== */}
+        {activeVideoIndex === null && (
+          <div className="flex-1 overflow-y-auto scrollbar-hide">
+            
+            {/* --- STICKY TOP HEADER --- */}
+            {/* Fixed height (h-14) and items-center for perfect vertical alignment */}
+            <div className="sticky top-0 z-30 bg-black/95 backdrop-blur-md h-14 px-4 flex items-center justify-between border-b border-white/5">
+              <button 
+                onClick={() => navigate('/')} 
+                className="p-2 -ml-2 rounded-full hover:bg-white/10 transition active:scale-95"
+              >
+                <ArrowLeft className="w-6 h-6 text-white" />
+              </button>
+              
+              <h1 className="font-bold text-base text-white truncate text-center flex-1 px-4">
+                {profile.name}
+              </h1>
+              
+              {/* Invisible spacer to balance the header (keeps title centered) */}
+              <div className="w-8"></div>
+            </div>
+
+            {/* --- PROFILE INFO SECTION --- */}
+            <div className="px-5 pt-6 pb-2">
+              <div className="flex flex-col items-center">
+                
+                {/* Avatar */}
+                <div className="mb-3 relative group">
+                   <div className="absolute -inset-[2px] bg-gradient-to-tr from-orange-500 to-pink-600 rounded-full opacity-80 group-hover:opacity-100 transition duration-500"></div>
+                   <div className="relative w-[88px] h-[88px] rounded-full bg-[#1a1a1a] border-2 border-black flex items-center justify-center overflow-hidden">
+                      <UtensilsCrossed className="w-9 h-9 text-white/40" />
+                   </div>
                 </div>
-              </div>
-              <div className="flex justify-around mt-6 text-center">
-                <div>
-                  <p className="text-sm opacity-80">meals</p>
-                  <p className="text-lg font-bold">{videos.length}</p>
+
+                {/* Name & Bio */}
+                <h2 className="text-lg font-bold text-white tracking-wide text-center leading-tight">
+                  {profile.name}
+                </h2>
+                
+                <div className="flex items-center gap-1.5 text-sm text-white/60 mt-2 mb-6 bg-white/5 px-3 py-1 rounded-full">
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span className="truncate max-w-[200px]">{profile.address || "Location"}</span>
                 </div>
-                <div>
-                  <p className="text-sm opacity-80">customers</p>
-                  <p className="text-lg font-bold">15K</p>
+
+                {/* Stats Row (Grid for perfect alignment) */}
+                <div className="grid grid-cols-3 divide-x divide-white/10 w-full border-t border-b border-white/10 py-3 mb-2">
+                  <div className="flex flex-col items-center">
+                    <span className="font-bold text-lg text-white leading-none mb-1">{videos.length}</span>
+                    <span className="text-[11px] text-white/50 uppercase tracking-widest">Meals</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="font-bold text-lg text-white leading-none mb-1">15.2K</span>
+                    <span className="text-[11px] text-white/50 uppercase tracking-widest">Served</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="font-bold text-lg text-white leading-none mb-1">4.9</span>
+                    <span className="text-[11px] text-white/50 uppercase tracking-widest">Rating</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Video Grid */}
-            <div className="grid grid-cols-3 gap-1">
+            {/* --- GRID TABS --- */}
+            <div className="flex justify-center mt-2">
+              <button className="flex-1 flex justify-center py-3 border-b border-white text-white">
+                <Grid3X3 className="w-6 h-6" />
+              </button>
+              <button className="flex-1 flex justify-center py-3 border-b border-white/10 text-white/30 hover:text-white/60 transition">
+                <Bookmark className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* --- VIDEO GRID --- */}
+            <div className="grid grid-cols-3 gap-0.5 pb-20">
               {videos.map((item, index) => (
                 <div
                   key={item._id}
                   onClick={() => openPlayer(index)}
-                  className="aspect-[9/16] bg-[#083a5f] overflow-hidden cursor-pointer relative group"
+                  className="aspect-[3/4] bg-[#111] relative cursor-pointer group overflow-hidden"
                 >
                   <video
                     src={item.video}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-300"
                     muted
                   />
+                  {/* Play Count Overlay */}
+                  <div className="absolute bottom-2 left-2 flex items-center gap-1 text-white text-xs drop-shadow-md">
+                     <Play className="w-3 h-3 fill-white" />
+                     <span>{Math.floor(Math.random() * 50) + 1}k</span>
+                  </div>
                 </div>
               ))}
             </div>
+
+            {/* Empty State */}
+            {videos.length === 0 && (
+               <div className="py-20 text-center text-white/30 text-sm flex flex-col items-center gap-2">
+                  <UtensilsCrossed className="w-8 h-8 opacity-20" />
+                  <p>No meals shared yet.</p>
+               </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
 
 
-      {/* ---------------- VIEW 2: FULL SCREEN PLAYER OVERLAY ---------------- */}
-      {activeVideoIndex !== null && (
-        <div 
-          ref={containerRef}
-          className="fixed inset-0 z-50 bg-black h-screen w-full overflow-y-scroll snap-y snap-mandatory"
-        >
-          {/* Back Button (Closes Player, Returns to Profile Grid) */}
-          <button 
-            onClick={closePlayer}
-            className="fixed top-4 left-4 z-[60] bg-black/50 backdrop-blur-md p-2 rounded-full text-white hover:bg-black/70 transition"
+        {/* ==================== VIEW 2: FULL SCREEN PLAYER ==================== */}
+        {activeVideoIndex !== null && (
+          <div 
+            ref={containerRef}
+            className="absolute inset-0 z-50 bg-black h-full w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
           >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
+            {/* HEADER OVERLAY (Fixed Gradient for Visibility) */}
+            <div className="fixed top-0 w-full md:w-[460px] z-[60] h-24 bg-gradient-to-b from-black/80 to-transparent pointer-events-none"></div>
 
-          {videos.map((video, idx) => (
-            <section
-              key={video._id}
-              data-index={idx}
-              ref={(el) => (reelRefs.current[idx] = el)}
-              className="w-full snap-start relative"
-              style={{ height: "100vh" }}
-            >
-              <video
-                ref={(el) => (videoRefs.current[idx] = el)}
-                src={video.video}
-                className="h-full w-full object-cover"
-                loop
-                muted={false} 
-                playsInline
-                onClick={(e) => e.target.muted = !e.target.muted} 
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-
-              <div className="absolute bottom-24 left-0 right-0 px-6 z-10 pointer-events-none">
-                <p className="text-white text-sm mb-4">{video.description}</p>
-                <div className="mx-auto w-44 bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold">
-                   <Store className="w-5 h-5" />
+            <div className="fixed top-0 w-full md:w-[460px] z-[70] flex items-center justify-between px-4 py-4 pointer-events-none">
+                {/* Back Button */}
+                <button 
+                  onClick={closePlayer}
+                  className="pointer-events-auto text-white hover:text-white/80 transition active:scale-95 drop-shadow-lg"
+                >
+                  <ArrowLeft className="w-7 h-7 stroke-[2]" />
+                </button>
+                
+                {/* Title */}
+                <span className="text-xs font-bold text-white/90 uppercase tracking-widest drop-shadow-md">
                    {profile.name}
-                </div>
-              </div>
+                </span>
 
-              <div className="absolute right-4 bottom-28 z-20 flex flex-col items-center gap-6 text-white">
-                 <div className="flex flex-col items-center">
-                    <button className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-1">
-                       <Heart className="w-6 h-6" />
-                    </button>
-                    <span className="text-xs">{video.likeCount || 0}</span>
-                 </div>
-                 <div className="flex flex-col items-center">
-                    <button className="bg-white/20 backdrop-blur-md rounded-full p-3 mb-1">
-                       <Bookmark className="w-6 h-6" />
-                    </button>
-                    <span className="text-xs">{video.saveCount || 0}</span>
-                 </div>
-                 <button className="bg-white/20 backdrop-blur-md rounded-full p-3">
-                    <MessageCircle className="w-6 h-6" />
-                 </button>
-              </div>
+                <div className="w-7"></div>
+            </div>
 
-              {idx === 0 && (
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-white/70">
-                  <ChevronDown />
+            {/* VIDEO LOOP */}
+            {videos.map((video, idx) => (
+              <section
+                key={video._id}
+                data-index={idx}
+                ref={(el) => (reelRefs.current[idx] = el)}
+                className="w-full h-full snap-start relative"
+              >
+                {/* Video */}
+                <video
+                  ref={(el) => (videoRefs.current[idx] = el)}
+                  src={video.video}
+                  className="h-full w-full object-cover"
+                  loop
+                  muted={false} 
+                  playsInline
+                  onClick={(e) => e.target.muted = !e.target.muted} 
+                />
+                
+                {/* Gradients */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90 pointer-events-none" />
+
+                {/* Bottom Info */}
+                <div className="absolute bottom-[70px] left-0 right-16 px-5 z-10 pointer-events-none flex flex-col items-start gap-3">
+                  
+                  {/* Partner Pill */}
+                  <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                     <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-orange-500 to-pink-500 flex items-center justify-center">
+                       <Store className="w-3 h-3 text-white" />
+                     </div>
+                     <span className="text-xs font-bold text-white pr-1">{profile.name}</span>
+                  </div>
+
+                  <p className="text-white text-[15px] leading-relaxed drop-shadow-md line-clamp-3 opacity-95">
+                    {video.description}
+                  </p>
                 </div>
-              )}
-            </section>
-          ))}
-        </div>
-      )}
+
+                {/* Right Action Bar */}
+                <div className="absolute right-3 bottom-[80px] z-20 flex flex-col items-center gap-6">
+                   <div className="flex flex-col items-center gap-1">
+                      <button className="transition-transform active:scale-75 p-2">
+                         <Heart className={`w-8 h-8 stroke-[1.5] drop-shadow-lg ${video.likeCount > 0 ? "text-red-500 fill-red-500" : "text-white"}`} />
+                      </button>
+                      <span className="text-xs font-medium text-white drop-shadow-md">{video.likeCount || 0}</span>
+                   </div>
+                   
+                   <div className="flex flex-col items-center gap-1">
+                      <button className="transition-transform active:scale-75 p-2">
+                         <Bookmark className={`w-8 h-8 stroke-[1.5] drop-shadow-lg ${video.saveCount > 0 ? "text-white fill-white" : "text-white"}`} />
+                      </button>
+                      <span className="text-xs font-medium text-white drop-shadow-md">{video.saveCount || 0}</span>
+                   </div>
+
+                   <button className="transition-transform active:scale-75 p-2">
+                      <MessageCircle className="w-8 h-8 stroke-[1.5] text-white drop-shadow-lg" />
+                   </button>
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

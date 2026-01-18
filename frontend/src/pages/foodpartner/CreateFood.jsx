@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Upload, Type, AlignLeft, LogOut } from "lucide-react"; // 1. Import LogOut
+import { 
+  Upload, 
+  Type, 
+  AlignLeft, 
+  LogOut, 
+  Video, 
+  Utensils, 
+  ArrowLeft,
+  X,
+  Loader2
+} from "lucide-react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // 2. Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 export const CreateFood = () => {
   const [videoFile, setVideoFile] = useState(null);
@@ -10,7 +20,7 @@ export const CreateFood = () => {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     return () => {
@@ -20,33 +30,41 @@ export const CreateFood = () => {
 
   // --- LOGOUT FUNCTION ---
   const handleLogout = async () => {
-    try {
-      await axios.post(
-        "/api/v1/foodpartner/logout", // Assuming standard hyphen naming
-        {},
-        { withCredentials: true }
-      );
-      navigate("/food-partner/login"); // Redirect to partner login
-    } catch (error) {
-      console.error("Logout failed", error);
-      // Force redirect even if API fails (token clear fallback)
-      navigate("/food-partner/login");
+    if (window.confirm("Are you sure you want to log out?")) {
+      try {
+        await axios.post(
+          "/api/v1/foodpartner/logout", 
+          {},
+          { withCredentials: true }
+        );
+        navigate("/food-partner/login");
+      } catch (error) {
+        console.error("Logout failed", error);
+        navigate("/food-partner/login");
+      }
     }
   };
 
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setVideoFile(file);
     setVideoPreview(URL.createObjectURL(file));
+  };
+
+  const clearVideo = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setVideoFile(null);
+    setVideoPreview(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!videoFile || !foodName || !description) {
-      alert("All fields are required");
+      // You could use a toast notification here
+      alert("Please fill in all fields and upload a video.");
       return;
     }
 
@@ -58,118 +76,188 @@ export const CreateFood = () => {
       formData.append("description", description);
       formData.append("video", videoFile);
 
-      const res = await axios.post(
-        "http://localhost:5000/api/v1/food/",
+      await axios.post(
+        "/api/v1/food/",
         formData,
         {
           withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
-      console.log("Uploaded:", res.data);
-      alert("Food reel uploaded!");
-
+      alert("Reel posted successfully!");
+      // Reset form
       setFoodName("");
       setDescription("");
       setVideoFile(null);
       setVideoPreview(null);
+      
+      // Optional: Navigate to profile to see the new post
+      // navigate(`/food-partner/${partnerId}`); 
+
     } catch (err) {
       console.error(err);
-      alert("Upload failed");
+      alert("Upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex justify-center items-start p-4 sm:p-8 relative">
+    // OUTER WRAPPER (Desktop Background)
+    <div className="min-h-screen bg-[#121212] flex justify-center items-center font-sans">
       
-      {/* --- LOGOUT BUTTON (Top Right) --- */}
-      <button 
-        onClick={handleLogout}
-        className="absolute top-4 right-4 bg-[#111] p-2 rounded-full text-gray-400 hover:text-white hover:bg-red-900/30 transition-all border border-gray-800"
-        title="Logout"
-      >
-        <LogOut className="w-5 h-5" />
-      </button>
+      {/* APP CONTAINER */}
+      <div className="w-full md:w-[460px] h-[100dvh] bg-black relative shadow-2xl md:rounded-xl overflow-hidden flex flex-col">
+        
+        {/* --- HEADER --- */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 bg-black/50 backdrop-blur-md z-20 absolute top-0 w-full">
+           <div className="flex items-center gap-3">
+             {/* Optional Back Button if needed */}
+             {/* <button onClick={() => navigate(-1)}><ArrowLeft className="w-6 h-6 text-white" /></button> */}
+             <h1 className="text-lg font-bold text-white tracking-wide">New Reel</h1>
+           </div>
+           
+           <button 
+            onClick={handleLogout}
+            className="p-2 bg-white/5 rounded-full text-white/60 hover:text-red-400 hover:bg-white/10 transition-all"
+            title="Logout"
+           >
+             <LogOut className="w-5 h-5" />
+           </button>
+        </div>
 
-      <div className="w-full max-w-md sm:max-w-lg bg-[#111] rounded-2xl shadow-xl p-5 sm:p-6 mt-8">
-
-        <h2 className="text-2xl font-bold mb-1">Upload Food Reel</h2>
-        <p className="text-sm text-gray-400 mb-6">
-          Share your food video to attract customers
-        </p>
-
-        <form onSubmit={handleSubmit}>
-
-          {/* VIDEO */}
-          <label className="block mb-5 cursor-pointer">
-            <input
-              type="file"
-              accept="video/*"
-              className="hidden"
-              onChange={handleVideoChange}
-            />
-
-            <div className="border-2 border-dashed border-gray-600 rounded-xl p-4 flex flex-col items-center justify-center hover:border-orange-500 transition">
-              {videoPreview ? (
-                <video
-                  src={videoPreview}
-                  controls
-                  className="w-full rounded-lg max-h-[420px] object-cover"
+        {/* --- SCROLLABLE FORM AREA --- */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide pt-20 pb-24 px-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            
+            {/* 1. VIDEO UPLOAD (9:16 Aspect Ratio) */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-white/60 uppercase tracking-wider ml-1">
+                Upload Video
+              </label>
+              
+              <label className="relative block w-full aspect-[9/16] bg-[#1a1a1a] rounded-2xl border-2 border-dashed border-white/10 hover:border-orange-500/50 transition-colors cursor-pointer overflow-hidden group">
+                <input
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={handleVideoChange}
                 />
-              ) : (
-                <>
-                  <Upload className="w-8 h-8 mb-2 text-gray-400" />
-                  <p className="text-sm text-gray-400 text-center">
-                    Tap to upload food video
-                  </p>
-                </>
-              )}
+
+                {videoPreview ? (
+                  <>
+                    <video
+                      src={videoPreview}
+                      className="w-full h-full object-cover"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    />
+                    {/* Gradient overlay for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40 pointer-events-none" />
+                    
+                    {/* Clear Button */}
+                    <button 
+                      onClick={clearVideo}
+                      className="absolute top-3 right-3 p-2 bg-black/60 rounded-full text-white hover:bg-red-500 transition"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="absolute bottom-4 left-0 right-0 text-center">
+                       <span className="text-xs text-white/80 bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
+                         Tap to change video
+                       </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white/40 group-hover:text-white/80 transition-colors">
+                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                       <Video className="w-8 h-8" />
+                    </div>
+                    <p className="text-sm font-medium">Select Video</p>
+                    <p className="text-xs opacity-50 mt-1">9:16 Aspect Ratio Recommended</p>
+                  </div>
+                )}
+              </label>
             </div>
-          </label>
 
-          {/* NAME */}
-          <div className="mb-4">
-            <label className="text-sm text-gray-300 mb-1 flex items-center gap-2">
-              <Type className="w-4 h-4" />
-              Food Name
-            </label>
-            <input
-              value={foodName}
-              onChange={(e) => setFoodName(e.target.value)}
-              className="w-full bg-[#1c1c1c] border border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-orange-500 transition"
-              placeholder="e.g. Spicy Chicken Burger"
-            />
-          </div>
+            {/* 2. DETAILS SECTION */}
+            <div className="space-y-5">
+               
+               {/* Name Input */}
+               <div className="space-y-2">
+                 <label className="block text-xs font-bold text-white/60 uppercase tracking-wider ml-1">
+                    Meal Name
+                 </label>
+                 <div className="relative">
+                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
+                     <Utensils className="w-5 h-5" />
+                   </div>
+                   <input
+                    value={foodName}
+                    onChange={(e) => setFoodName(e.target.value)}
+                    className="w-full bg-[#1a1a1a] text-white border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-orange-500 transition-colors placeholder:text-white/20"
+                    placeholder="e.g. Cheesy Smash Burger"
+                   />
+                 </div>
+               </div>
 
-          {/* DESC */}
-          <div className="mb-6">
-            <label className="text-sm text-gray-300 mb-1 flex items-center gap-2">
-              <AlignLeft className="w-4 h-4" />
-              Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full bg-[#1c1c1c] border border-gray-700 rounded-xl px-4 py-3 resize-none focus:border-orange-500 transition"
-              placeholder="Describe the taste, ingredients, or offer..."
-            />
-          </div>
+               {/* Description Input */}
+               <div className="space-y-2">
+                 <label className="block text-xs font-bold text-white/60 uppercase tracking-wider ml-1">
+                    Description
+                 </label>
+                 <div className="relative">
+                   <div className="absolute left-4 top-4 text-white/40">
+                     <AlignLeft className="w-5 h-5" />
+                   </div>
+                   <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={4}
+                    className="w-full bg-[#1a1a1a] text-white border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-orange-500 transition-colors placeholder:text-white/20 resize-none"
+                    placeholder="Tell customers what makes this special..."
+                   />
+                 </div>
+               </div>
 
+            </div>
+          </form>
+        </div>
+
+        {/* --- BOTTOM ACTION BAR --- */}
+        <div className="absolute bottom-0 w-full p-5 bg-gradient-to-t from-black via-black to-transparent z-30">
           <button
-            type="submit"
+            onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-xl font-bold hover:opacity-90 transition active:scale-[0.98]"
+            className="w-full bg-gradient-to-r from-orange-500 to-pink-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-900/20 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? "Uploading..." : "Publish Food Reel"}
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Uploading Reel...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-5 h-5" />
+                <span>Publish Reel</span>
+              </>
+            )}
           </button>
+        </div>
 
-        </form>
+        {/* LOADING OVERLAY (Full Screen Block) */}
+        {loading && (
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+            <Loader2 className="w-12 h-12 text-orange-500 animate-spin mb-4" />
+            <p className="text-white font-bold text-lg">Uploading...</p>
+            <p className="text-white/50 text-sm">Please keep this app open</p>
+          </div>
+        )}
+
       </div>
     </div>
   );

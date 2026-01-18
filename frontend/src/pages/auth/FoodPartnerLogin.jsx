@@ -1,108 +1,179 @@
-import { useState } from "react";
-import { Mail, Lock, Store } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import InputField from "../../components/common/InputField";
-import axios from "axios"
+import React, { useState } from "react";
+import { 
+  Mail, 
+  Lock, 
+  ArrowRight, 
+  Loader2, 
+  ChefHat, 
+  User 
+} from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+
 export default function FoodPartnerLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
-  
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const email = e.target.email.value
-    const password = e.target.password.value
+    setLoading(true);
 
-    const response = await axios.post("/api/v1/foodpartner/login", {
-      email,
-      password
-    },{
-      withCredentials: true
-    })
-
-    console.log(response)
-
-    navigate("/create-food")
-    
-  }
+    try {
+      const response = await axios.post(
+        "/api/v1/foodpartner/login",
+        formData,
+        { withCredentials: true }
+      );
+      console.log(response.data);
+      navigate("/create-food"); 
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Invalid credentials. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-50">
-
-      {/* Left Promo */}
-      <div className="lg:w-1/2 p-10 lg:p-20 flex flex-col justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-14 h-14 bg-white/30 rounded-2xl flex items-center justify-center">
-            <Store className="text-white w-7 h-7" />
-          </div>
-          <h1 className="text-5xl font-black">FoodReel Partner</h1>
+    // OUTER WRAPPER (Desktop Background - Dark Business Theme)
+    <div className="min-h-screen bg-[#0f0f11] flex justify-center items-center font-sans">
+      
+      {/* APP CONTAINER */}
+      <div className="w-full md:w-[460px] h-[100dvh] bg-black relative shadow-2xl md:rounded-xl overflow-hidden flex flex-col">
+        
+        {/* --- BACKGROUND IMAGE LAYER --- */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=2070&auto=format&fit=crop" 
+            alt="Restaurant Kitchen" 
+            className="w-full h-full object-cover opacity-50 grayscale-[20%]"
+          />
+          {/* Blue/Indigo Gradient for "Business/Partner" feel */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/90 to-blue-900/20" />
         </div>
 
-        <h2 className="text-5xl font-bold mb-6">Manage Your Restaurant</h2>
-        <p className="text-lg opacity-95 mb-8">
-          Login to manage orders and upload food reels.
-        </p>
-
-        <button
-          onClick={() => navigate("/user/login")}
-          className="mt-8 px-8 py-4 bg-white/20 rounded-xl font-bold hover:bg-white/30"
-        >
-          Login as User →
-        </button>
-      </div>
-
-      {/* Right Form */}
-      <div className="lg:w-1/2 flex items-center justify-center p-6">
-        <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl">
-
-          <h2 className="text-3xl font-black mb-2">Partner Login</h2>
-          <p className="text-gray-500 mb-8">
-            Access your restaurant dashboard
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <InputField
-              icon={Mail}
-              type="email"
-              name="email"
-              label="Business Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <InputField
-              icon={Lock}
-              type="password"
-              label="Password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-          <div className="flex justify-between items-center text-sm mt-6 mb-6">
-            <label className="flex gap-2">
-              <input type="checkbox" className="w-4 h-4" />
-              Remember me
-            </label>
-            <span className="text-blue-600 cursor-pointer font-semibold">
-              Forgot password?
-            </span>
+        {/* --- CONTENT LAYER --- */}
+        <div className="relative z-10 w-full h-full flex flex-col justify-center px-6 py-10 overflow-y-auto scrollbar-hide">
+          
+          {/* HEADER SECTION */}
+          <div className="mb-10">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-900/40">
+              <ChefHat className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">
+              Welcome Partner
+            </h1>
+            <p className="text-white/60 mt-2 text-sm leading-relaxed">
+              Log in to your dashboard to manage orders and upload food reels.
+            </p>
           </div>
 
-          <button type="submit" className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl font-bold">
-            Login to Dashboard
-          </button>
+          {/* FORM SECTION */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            
+            {/* Business Email */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-white/50 uppercase tracking-wider ml-1">Business Email</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-indigo-400 transition-colors">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="name@restaurant.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full bg-white/5 backdrop-blur-md border border-white/10 text-white placeholder:text-white/20 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-white/50 uppercase tracking-wider ml-1">Password</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-indigo-400 transition-colors">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full bg-white/5 backdrop-blur-md border border-white/10 text-white placeholder:text-white/20 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm text-center">
+                {error}
+              </div>
+            )}
+
+            {/* Spacer */}
+            <div className="h-2"></div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-900/40 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  Access Dashboard <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
           </form>
 
-          <p className="text-center text-gray-700 mt-6">
-            New partner?{" "}
-            <button
-              onClick={() => navigate("/food-partner/register")}
-              className="text-blue-600 font-bold"
+          {/* Register Link */}
+          <div className="mt-8 text-center">
+            <p className="text-white/60 text-sm">
+              New restaurant?{" "}
+              <Link to="/food-partner/register" className="text-white font-bold hover:underline decoration-indigo-500 underline-offset-4">
+                Register Here
+              </Link>
+            </p>
+          </div>
+
+          {/* FOOTER / USER LINK */}
+          <div className="mt-10 pt-6 border-t border-white/10">
+            <div 
+                onClick={() => navigate("/user/login")}
+                className="group flex items-center justify-between p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors"
             >
-              Register your restaurant
-            </button>
-          </p>
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors">
+                         <User className="w-4 h-4 text-white/70" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-white">Not a restaurant?</p>
+                        <p className="text-xs text-white/40">Login as a user instead</p>
+                    </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white transition-colors" />
+            </div>
+          </div>
 
         </div>
       </div>
