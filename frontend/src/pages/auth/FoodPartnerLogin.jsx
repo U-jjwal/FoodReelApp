@@ -13,7 +13,7 @@ export default function FoodPartnerLogin() {
     const email = e.target.email.value
     const password = e.target.password.value
 
-    const response = await axios.post("http://localhost:5000/api/v1/foodpartner/login", {
+    const response = await axios.post("/api/v1/foodpartner/login", {
       email,
       password
     },{

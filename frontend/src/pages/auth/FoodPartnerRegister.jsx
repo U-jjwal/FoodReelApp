@@ -22,7 +22,7 @@ export default function FoodPartnerRegister() {
      const address = e.target.address.value
      const password = e.target.password.value
      
-     const response = await axios.post("http://localhost:5000/api/v1/foodpartner/register", {
+     const response = await axios.post("/api/v1/foodpartner/register", {
       name,
       contactName,
       phone,

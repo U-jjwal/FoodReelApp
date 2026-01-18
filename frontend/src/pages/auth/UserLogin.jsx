@@ -15,7 +15,7 @@ export default function UserLogin() {
     const email = e.target.email.value
     const password = e.target.password.value
 
-    const response = await axios.post("http://localhost:5000/api/v1/user/login", {
+    const response = await axios.post("/api/v1/user/login", {
         email,
         password
     },{

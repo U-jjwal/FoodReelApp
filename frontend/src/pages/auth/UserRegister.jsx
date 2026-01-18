@@ -22,7 +22,7 @@ export default function UserRegister() {
   const email = e.target.email.value;
   const password = e.target.password.value;
 
-   const response = await axios.post("http://localhost:5000/api/v1/user/register", {
+   const response = await axios.post("/api/v1/user/register", {
       fullName,
       email,
       password

@@ -10,7 +10,7 @@ export default function Saved() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/v1/food/save", {
+        axios.get("/api/v1/food/save", {
             withCredentials: true
         }).then(response => {
             // Map the nested structure (saveModel has 'food' object)

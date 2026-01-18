@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Upload, Type, AlignLeft } from "lucide-react";
+import { Upload, Type, AlignLeft, LogOut } from "lucide-react"; // 1. Import LogOut
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // 2. Import useNavigate
 
 export const CreateFood = () => {
   const [videoFile, setVideoFile] = useState(null);
@@ -9,11 +10,29 @@ export const CreateFood = () => {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate(); // Initialize navigate
+
   useEffect(() => {
     return () => {
       if (videoPreview) URL.revokeObjectURL(videoPreview);
     };
   }, [videoPreview]);
+
+  // --- LOGOUT FUNCTION ---
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        "/api/v1/foodpartner/logout", // Assuming standard hyphen naming
+        {},
+        { withCredentials: true }
+      );
+      navigate("/food-partner/login"); // Redirect to partner login
+    } catch (error) {
+      console.error("Logout failed", error);
+      // Force redirect even if API fails (token clear fallback)
+      navigate("/food-partner/login");
+    }
+  };
 
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
@@ -66,8 +85,18 @@ export const CreateFood = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex justify-center items-start p-4 sm:p-8">
-      <div className="w-full max-w-md sm:max-w-lg bg-[#111] rounded-2xl shadow-xl p-5 sm:p-6">
+    <div className="min-h-screen bg-black text-white flex justify-center items-start p-4 sm:p-8 relative">
+      
+      {/* --- LOGOUT BUTTON (Top Right) --- */}
+      <button 
+        onClick={handleLogout}
+        className="absolute top-4 right-4 bg-[#111] p-2 rounded-full text-gray-400 hover:text-white hover:bg-red-900/30 transition-all border border-gray-800"
+        title="Logout"
+      >
+        <LogOut className="w-5 h-5" />
+      </button>
+
+      <div className="w-full max-w-md sm:max-w-lg bg-[#111] rounded-2xl shadow-xl p-5 sm:p-6 mt-8">
 
         <h2 className="text-2xl font-bold mb-1">Upload Food Reel</h2>
         <p className="text-sm text-gray-400 mb-6">
@@ -112,7 +141,8 @@ export const CreateFood = () => {
             <input
               value={foodName}
               onChange={(e) => setFoodName(e.target.value)}
-              className="w-full bg-[#1c1c1c] border border-gray-700 rounded-xl px-4 py-3 outline-none"
+              className="w-full bg-[#1c1c1c] border border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-orange-500 transition"
+              placeholder="e.g. Spicy Chicken Burger"
             />
           </div>
 
@@ -126,14 +156,15 @@ export const CreateFood = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full bg-[#1c1c1c] border border-gray-700 rounded-xl px-4 py-3 resize-none"
+              className="w-full bg-[#1c1c1c] border border-gray-700 rounded-xl px-4 py-3 resize-none focus:border-orange-500 transition"
+              placeholder="Describe the taste, ingredients, or offer..."
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-xl font-bold"
+            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-xl font-bold hover:opacity-90 transition active:scale-[0.98]"
           >
             {loading ? "Uploading..." : "Publish Food Reel"}
           </button>
