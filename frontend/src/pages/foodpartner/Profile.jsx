@@ -30,7 +30,7 @@ export default function FoodPartnerProfile() {
   // --- FETCH DATA ---
   useEffect(() => {
     axios
-      .get(`/api/v1/food-partner/${id}`, { withCredentials: true })
+      .get(import.meta.env.VITE_BACKEND_URL + `/api/v1/food-partner/${id}`, { withCredentials: true })
       .then((response) => {
         setProfile(response.data.foodPartner);
         setVideos(response.data.foodPartner.foodItems);

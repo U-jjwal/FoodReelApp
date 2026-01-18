@@ -33,7 +33,7 @@ export const CreateFood = () => {
     if (window.confirm("Are you sure you want to log out?")) {
       try {
         await axios.post(
-          "/api/v1/foodpartner/logout", 
+         import.meta.env.VITE_BACKEND_URL + "/api/v1/foodpartner/logout", 
           {},
           { withCredentials: true }
         );
@@ -77,7 +77,7 @@ export const CreateFood = () => {
       formData.append("video", videoFile);
 
       await axios.post(
-        "/api/v1/food/",
+        import.meta.env.VITE_BACKEND_URL + "/api/v1/food/",
         formData,
         {
           withCredentials: true,

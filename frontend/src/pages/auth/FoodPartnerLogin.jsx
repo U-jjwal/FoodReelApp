@@ -31,7 +31,7 @@ export default function FoodPartnerLogin() {
 
     try {
       const response = await axios.post(
-        "/api/v1/foodpartner/login",
+        import.meta.env.VITE_BACKEND_URL + "/api/v1/foodpartner/login",
         formData,
         { withCredentials: true }
       );

@@ -36,7 +36,7 @@ export default function Home() {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "/api/v1/user/logout",
+        import.meta.env.VITE_BACKEND_URL + "/api/v1/user/logout",
         {},
         { withCredentials: true }
       );
@@ -56,7 +56,7 @@ export default function Home() {
       setCurrentIndex(parsedState.currentIndex);
     } else {
       axios
-        .get("/api/v1/food/", { withCredentials: true })
+        .get(import.meta.env.VITE_BACKEND_URL + "/api/v1/food/", { withCredentials: true })
         .then((res) => {
           const randomizedVideos = shuffleArray(res.data.foodItems);
           setVideos(randomizedVideos);
@@ -87,7 +87,7 @@ export default function Home() {
 
   const likehandle = async (videoId) => {
     const res = await axios.post(
-      "/api/v1/food/like",
+      import.meta.env.VITE_BACKEND_URL + "/api/v1/food/like",
       { foodId: videoId },
       { withCredentials: true }
     );
@@ -108,7 +108,7 @@ export default function Home() {
 
   const saveVideo = async (videoId) => {
     const res = await axios.post(
-      "/api/v1/food/save",
+      import.meta.env.VITE_BACKEND_URL + "/api/v1/food/save",
       { foodId: videoId },
       { withCredentials: true }
     );

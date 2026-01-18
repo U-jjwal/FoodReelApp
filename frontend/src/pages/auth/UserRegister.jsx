@@ -33,7 +33,7 @@ export default function UserRegister() {
 
     try {
       const response = await axios.post(
-        "/api/v1/user/register",
+        import.meta.env.VITE_BACKEND_URL + "/api/v1/user/register",
         formData,
         { withCredentials: true }
       );

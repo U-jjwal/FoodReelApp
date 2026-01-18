@@ -28,7 +28,7 @@ export default function Saved() {
 
     // --- FETCH DATA ---
     useEffect(() => {
-        axios.get("/api/v1/food/save", {
+        axios.get(import.meta.env.VITE_BACKEND_URL + "/api/v1/food/save", {
             withCredentials: true
         }).then(response => {
             const saveFoods = (response.data.saveFoods || []).map((item) => {

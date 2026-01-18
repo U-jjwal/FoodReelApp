@@ -38,6 +38,7 @@ export default function FoodPartnerRegister() {
 
     try {
       const response = await axios.post(
+        import.meta.env.VITE_BACKEND_URL + 
         "/api/v1/foodpartner/register",
         formData,
         { withCredentials: true }
