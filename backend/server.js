@@ -14,3 +14,5 @@ connectdb()
 .catch((err) => {
     console.error("Error starting server:", err);
 });
+
+export default app;
